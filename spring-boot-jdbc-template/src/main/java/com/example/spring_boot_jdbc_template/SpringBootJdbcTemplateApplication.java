@@ -83,5 +83,7 @@ public class SpringBootJdbcTemplateApplication implements CommandLineRunner {
         } catch (SQLException e) {
             logger.error("Database operation failed", e);
         }
+
+        logger.info("Database operation succeeded !");
     }
 }
