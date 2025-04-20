@@ -28,6 +28,9 @@ public class SpringBootJdbcTemplateApplication implements CommandLineRunner {
     @Value("${spring.datasource.password}")
     private String password;
 
+	@Value("${spring.datasource.driver-class-name}")
+    private String driver;
+
     public static void main(String[] args) {
         SpringApplication.run(SpringBootJdbcTemplateApplication.class, args);
     }
@@ -36,7 +39,7 @@ public class SpringBootJdbcTemplateApplication implements CommandLineRunner {
     public void run(String... args) {
         // Charger le driver JDBC
         try {
-            Class.forName("org.h2.Driver");
+            Class.forName(driver);
             logger.info("Driver loaded successfully");
         } catch (ClassNotFoundException e) {
             logger.error("Driver loading failed", e);
