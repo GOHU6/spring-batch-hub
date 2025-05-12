@@ -32,6 +32,7 @@ public class ItemReaderStep implements Tasklet{
     public RepeatStatus execute(@NonNull StepContribution contribution, @NonNull ChunkContext chunkContext) throws Exception {
         
         try {
+            logger.info("~~~~ ItemReaderStep ~~~~\n");
 
 			data = repository.findAll();
             logger.info("Successfully read {} rows", data.size());

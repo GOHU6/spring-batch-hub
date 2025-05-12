@@ -1,6 +1,5 @@
 package com.example.spring_batch_tasklet.writer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -25,16 +24,21 @@ public class ItemWriterStep implements Tasklet{
     @Override
     @Nullable
     public RepeatStatus execute(@NonNull StepContribution contribution, @NonNull ChunkContext chunkContext) throws Exception {
-        
-        System.out.println("data okoko");
-
-        // For debug
-        int index = 1;
-        for (DataEntity entity : data) {
-            logger.info("#{} - {}", index++, entity.toString());
-        }
-        return RepeatStatus.FINISHED;
-
-    }
     
+        try {
+            logger.info("~~~~ ItemWriterStep ~~~~\n");
+
+            // For debug
+            int index = 1;
+            for (DataEntity entity : data) {
+                logger.info("#{} - {}", index++, entity.toString());
+            }
+
+        } catch (Exception e) {
+			logger.error("Error while writing data", e);
+			throw e;
+        }
+        
+        return RepeatStatus.FINISHED;
+    }
 }

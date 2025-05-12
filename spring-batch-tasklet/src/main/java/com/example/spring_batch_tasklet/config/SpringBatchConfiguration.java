@@ -62,14 +62,14 @@ public class SpringBatchConfiguration {
 
 			@Override
 			public void beforeJob(JobExecution jobExecution) {
-				logger.info("~~~~ Job has started ~~~~");
+				logger.info("~~~~ Job has started ~~~~\n");
 				logger.info("Job started at: "+ jobExecution.getStartTime());
 				logger.info("Status of the Job: "+jobExecution.getStatus());
 			}
 
 			@Override
 			public void afterJob(JobExecution jobExecution) {
-				logger.info("~~~~ Finishing the job ~~~~");
+				logger.info("~~~~ Finishing the job ~~~~\n");
 				logger.info("Job Ended at: "+ jobExecution.getEndTime());
 				logger.info("Status of the Job: "+jobExecution.getStatus());
 				
