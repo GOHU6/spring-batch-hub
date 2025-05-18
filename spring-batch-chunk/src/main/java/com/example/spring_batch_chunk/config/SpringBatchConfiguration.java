@@ -1,7 +1,5 @@
 package com.example.spring_batch_chunk.config;
 
-
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -19,22 +17,48 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.example.spring_batch_chunk.model.DataEntity;
-import com.example.spring_batch_chunk.reader.ItemReaderStep;
+import com.example.spring_batch_chunk.reader.DataItemReader;
 import com.example.spring_batch_chunk.repository.ItemRepository;
-import com.example.spring_batch_chunk.writer.ItemWriterStep;
+import com.example.spring_batch_chunk.writer.DataItemWriter;
 
 @Configuration
-public class SpringBatchConfiguration{
-    
+public class SpringBatchConfiguration {
+
     private static final Logger logger = LoggerFactory.getLogger(SpringBatchConfiguration.class);
-	
-    ItemRepository repository;
+
+    @Autowired
+	private List<DataEntity> data;
+
+	@Bean
+	@StepScope
+	protected ItemReader<DataEntity> itemReader(ItemRepository repository) {
+		data = repository.findAll();
+		logger.info("Sending {} data", data.size());
+		return new DataItemReader(data);
+	}
+
+	@Bean
+	protected ItemWriter<DataEntity> itemWriter() {
+		return new DataItemWriter();
+	}
+
+	@Bean
+	public Step stepDataBuilder(JobRepository jobRepository, PlatformTransactionManager transactionManager, ItemRepository repository) {
+		return new StepBuilder("stepDataBuilder",jobRepository)
+				.<DataEntity, DataEntity> chunk(2 ,transactionManager)
+				.allowStartIfComplete(true)
+				.reader(itemReader(repository))
+				.writer(itemWriter())
+				.build();
+	}
 
 	@Bean
 	public ApplicationRunner jobRunner(JobLauncher jobLauncher, Job job) {
@@ -48,11 +72,11 @@ public class SpringBatchConfiguration{
 	}
 
     @Bean
-	public Job batchjob(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+	public Job batchjob(JobRepository jobRepository, PlatformTransactionManager transactionManager, ItemRepository repository) {
 		return new JobBuilder("batchjob",jobRepository)
 				.incrementer(new RunIdIncrementer())
 				.listener(joblistener())
-                .start(stepDataBuilder(jobRepository, transactionManager))
+                .start(stepDataBuilder(jobRepository, transactionManager, repository))
                 .build();
 	}
 
@@ -84,30 +108,4 @@ public class SpringBatchConfiguration{
 
 		};
 	}
-
-    @Bean
-	public Step stepDataBuilder(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
-		return new StepBuilder("stepDataBuilder",jobRepository)
-				.<DataEntity, DataEntity> chunk(10 ,transactionManager)
-				.allowStartIfComplete(true)
-				.reader(readerStep())
-				.writer(writerStep())
-				.build();
-	}
-
-    /*Reader*/
-    @Bean
-    @StepScope
-    public ItemReader<DataEntity> readerStep() {
-        List<DataEntity> items = new ArrayList<>();
-		items = repository.findAllList();
-        return new ItemReaderStep(items);
-    }
-    
-    /*Writer*/
-    @Bean
-    @StepScope
-    public ItemWriterStep writerStep() {
-        return new ItemWriterStep();
-    }
 }

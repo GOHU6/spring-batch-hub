@@ -19,7 +19,6 @@ import lombok.ToString;
 @ToString
 @Table(name="TEST")
 public class DataEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
